@@ -1,21 +1,25 @@
 package models
 
 import (
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"fmt"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
 
-func ConnectDatabase() {
-	database, err := gorm.Open("sqlite3", "test.db")
+func Connection() {
+	dsn := "host=localhost port=5432 user=postgres dbname=postgres password=1234"
+	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("Erro ao abrir o banco!")
+		panic(err)
 	}
 
 	database.AutoMigrate(&Book{})
-	// tratar o erro
 
 	DB = database
+
+	fmt.Println("Conectado com sucesso!")
 
 }

@@ -11,7 +11,7 @@ func main() {
 	// gin router
 	router := gin.Default()
 
-	models.ConnectDatabase()
+	models.Connection()
 	router.GET("/books", handlers.FindBooks)
 	router.POST("/books", handlers.CreateBook)
 	router.GET("/books/:id", handlers.FindBook)
