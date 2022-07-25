@@ -1,12 +1,11 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"rest_api/models"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 )
 
 //para validar criação
@@ -21,25 +20,20 @@ type UpdateBookInput struct {
 	Autor  string `json:"autor"`
 }
 
-func FindBooks(context *gin.Context) {
+func FindBooks(context echo.Context) error {
 	var books []models.Book
 	models.DB.Find(&books) //select * from
 
-	context.JSON(http.StatusOK, gin.H{
-		"livros": books})
+	return context.JSON(http.StatusOK, books)
 
 }
 
-func Verifica() error {
-	return errors.New("Falha ao executar o método")
-}
-
-func CreateBook(context *gin.Context) {
+func CreateBook(context echo.Context) error {
 	var input CreateBookInput
 	//				  valida o resquest
-	if err := context.ShouldBindJSON(&input); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
-		return
+	if err := context.Bind(&input); err != nil {
+		context.JSON(http.StatusBadRequest, err.Error())
+		return err
 	}
 
 	book := models.Book{Titulo: input.Titulo, Autor: input.Autor}
@@ -48,66 +42,51 @@ func CreateBook(context *gin.Context) {
 		fmt.Println(err)
 	}
 
-	context.JSON(http.StatusCreated, gin.H{"livros": book})
+	return context.JSON(http.StatusCreated, book)
 }
 
-func FindBook(context *gin.Context) {
+func FindBook(context echo.Context) error {
 	var book models.Book
 	// 										"parametrizado"
 	if err := models.DB.Where("id = ?", context.Param("id")).First(&book).Error; err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"erro": "Nada encontrado!",
-		})
-		return
+		context.JSON(http.StatusBadRequest, "Nada encontrado!")
+		return err
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"livro:": book,
-	})
+	return context.JSON(http.StatusOK, book)
 }
 
-func UpdateBook(context *gin.Context) {
+func UpdateBook(context echo.Context) error {
 
 	var book models.Book
 	if err := models.DB.Where("id = ?", context.Param("id")).First(&book).Error; err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"Erro": "Nenhum livro encontrado!",
-		})
-		return
+		context.JSON(http.StatusBadRequest, "Nenhum livro encontrado!")
+		return err
 	}
 
 	var input UpdateBookInput
-	if err := context.ShouldBindJSON(&input); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"Erro": err.Error(),
-		})
-		return
+	if err := context.Bind(&input); err != nil {
+		context.JSON(http.StatusBadRequest, err.Error())
+		return err
 	}
 
 	models.DB.Model(&book).Updates(input) //update set
 	// tratar o erro
 
-	context.JSON(http.StatusOK, gin.H{
-		"livros": book,
-	})
+	return context.JSON(http.StatusOK, book)
 
 }
 
-func DeleteBook(context *gin.Context) {
+func DeleteBook(context echo.Context) error {
 	var book models.Book
 	if err := models.DB.Where("id = ?", context.Param("id")).First(&book).Error; err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{
-			"Erro":     err.Error(),
-			"Mensagem": "livro não encontrado!",
-		})
-		return
+		context.JSON(http.StatusBadRequest, "livro não encontrado!")
+		return err
 	}
 
 	models.DB.Delete(&book) // delete from
 	// tratar o erro
 
-	context.JSON(http.StatusOK, gin.H{
-		"mensagem:": "livro deletado",
-	})
+	return context.JSON(http.StatusOK, "livro deletado")
 
 }

@@ -4,19 +4,23 @@ import (
 	"rest_api/handlers"
 	"rest_api/models"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
 	// gin router
-	router := gin.Default()
+	server := echo.New()
+
+	server.Use(middleware.Logger())
+	server.Use(middleware.Recover())
 
 	models.Connection()
-	router.GET("/books", handlers.FindBooks)
-	router.POST("/books", handlers.CreateBook)
-	router.GET("/books/:id", handlers.FindBook)
-	router.PUT("/books/:id", handlers.UpdateBook)
-	router.DELETE("/books/:id", handlers.DeleteBook)
+	server.GET("/books", handlers.FindBooks)
+	server.POST("/books", handlers.CreateBook)
+	server.GET("/books/:id", handlers.FindBook)
+	server.PUT("/books/:id", handlers.UpdateBook)
+	server.DELETE("/books/:id", handlers.DeleteBook)
 
-	router.Run()
+	server.Logger.Fatal(server.Start(":8080"))
 }
