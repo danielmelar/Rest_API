@@ -16,7 +16,9 @@ type CreateBookInput struct {
 
 func FindBooks(context echo.Context) error {
 	var books []models.Book
-	models.DB.Find(&books) //select * from
+	if err := models.DB.Find(&books).Error; err != nil {
+		fmt.Println(err)
+	}
 
 	return context.JSON(http.StatusOK, books)
 
@@ -77,7 +79,7 @@ func UpdateBook(context echo.Context) error {
 	updateBook := models.Book{Titulo: input.Titulo, Autor: input.Autor}
 
 	if err := models.DB.Model(&book).Updates(&updateBook).Error; err != nil {
-		context.JSON(500, err.Error())
+		context.JSON(http.StatusInternalServerError, err.Error())
 		return err
 	}
 
