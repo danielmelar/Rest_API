@@ -16,7 +16,9 @@ func Connection() {
 		panic(err)
 	}
 
-	database.AutoMigrate(&Book{})
+	if err := database.AutoMigrate(&Book{}); err != nil {
+		fmt.Println(err)
+	}
 
 	DB = database
 

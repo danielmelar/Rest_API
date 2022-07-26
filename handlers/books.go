@@ -91,9 +91,10 @@ func DeleteBook(context echo.Context) error {
 		context.JSON(http.StatusBadRequest, "livro não encontrado!")
 		return err
 	}
-
-	models.DB.Delete(&book) // delete from
-	// tratar o erro
+	// delete from
+	if err := models.DB.Delete(&book); err != nil {
+		fmt.Println(err)
+	}
 
 	return context.JSON(http.StatusOK, "livro deletado")
 
