@@ -14,12 +14,6 @@ type CreateBookInput struct {
 	Autor  string `json:"autor" binding:"required"`
 }
 
-//para validar edição
-type UpdateBookInput struct {
-	Titulo string `json:"titulo"`
-	Autor  string `json:"autor"`
-}
-
 func FindBooks(context echo.Context) error {
 	var books []models.Book
 	models.DB.Find(&books) //select * from
@@ -56,22 +50,36 @@ func FindBook(context echo.Context) error {
 	return context.JSON(http.StatusOK, book)
 }
 
+//para validar edição
+type UpdateBookInput struct {
+	Titulo string `json:"titulo"`
+	Autor  string `json:"autor"`
+}
+
 func UpdateBook(context echo.Context) error {
 
 	var book models.Book
 	if err := models.DB.Where("id = ?", context.Param("id")).First(&book).Error; err != nil {
-		context.JSON(http.StatusBadRequest, "Nenhum livro encontrado!")
+		context.JSON(http.StatusBadRequest, map[string]string{
+			"Erro": "Nenhum livro encontrado",
+		})
 		return err
 	}
 
 	var input UpdateBookInput
 	if err := context.Bind(&input); err != nil {
-		context.JSON(http.StatusBadRequest, err.Error())
-		return err
+		return context.JSON(http.StatusBadRequest, map[string]string{
+			"Erro": err.Error(),
+		})
+
 	}
 
-	models.DB.Model(&book).Updates(input) //update set
-	// tratar o erro
+	updateBook := models.Book{Titulo: input.Titulo, Autor: input.Autor}
+
+	if err := models.DB.Model(&book).Updates(&updateBook).Error; err != nil {
+		context.JSON(500, err.Error())
+		return err
+	}
 
 	return context.JSON(http.StatusOK, book)
 
