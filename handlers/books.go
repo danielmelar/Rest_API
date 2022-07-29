@@ -9,6 +9,7 @@ import (
 
 func FindBooks(context echo.Context) error {
 	var books []models.Book
+	// Find == select * from
 	if err := models.DB.Find(&books).Error; err != nil {
 		return context.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -26,13 +27,14 @@ type CreateBookInput struct {
 
 func CreateBook(context echo.Context) error {
 	var input CreateBookInput
-
+	// Bind valida a requisição
 	if err := context.Bind(&input); err != nil {
 		context.JSON(http.StatusBadRequest, err.Error())
 		return err
 	}
 
 	book := models.Book{Titulo: input.Titulo, Autor: input.Autor}
+
 	err := models.DB.Create(&book).Error
 	if err != nil {
 		context.JSON(http.StatusBadRequest, err.Error())
@@ -46,9 +48,9 @@ func CreateBook(context echo.Context) error {
 
 func FindBook(context echo.Context) error {
 	var book models.Book
-
+	// Param -> parametriza
 	if err := models.DB.Where("id = ?", context.Param("id")).First(&book).Error; err != nil {
-		return context.JSON(http.StatusBadRequest, "Nada encontrado!")
+		return context.JSON(http.StatusBadRequest, err.Error())
 
 	}
 
@@ -65,9 +67,8 @@ type UpdateBookInput struct {
 func UpdateBook(context echo.Context) error {
 
 	var book models.Book
-
 	if err := models.DB.Where("id = ?", context.Param("id")).First(&book).Error; err != nil {
-		return context.JSON(http.StatusBadRequest, "Livro não encontrado!")
+		return context.JSON(http.StatusBadRequest, err.Error())
 
 	}
 
@@ -95,7 +96,7 @@ func UpdateBook(context echo.Context) error {
 func DeleteBook(context echo.Context) error {
 	var book models.Book
 	if err := models.DB.Where("id = ?", context.Param("id")).First(&book).Error; err != nil {
-		context.JSON(http.StatusBadRequest, "livro não encontrado!")
+		context.JSON(http.StatusBadRequest, err.Error())
 		return err
 	}
 

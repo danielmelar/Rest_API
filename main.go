@@ -9,13 +9,15 @@ import (
 )
 
 func main() {
-	// gin router
+	// server echo
 	server := echo.New()
 
+	// para gerar logs e controle de panics
 	server.Use(middleware.Logger())
 	server.Use(middleware.Recover())
 
-	models.Connection()
+	models.Connection() // conexão com o banco
+
 	server.GET("/books", handlers.FindBooks)
 	server.POST("/books", handlers.CreateBook)
 	server.GET("/books/:id", handlers.FindBook)
