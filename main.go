@@ -15,9 +15,15 @@ func main() {
 	// para gerar logs e controle de panics
 	server.Use(middleware.Logger())
 	server.Use(middleware.Recover())
+	//tratamento de cors
+	server.Use(middleware.CORS())
+
+	server.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"Acess-Control-Allow-Origin", "*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 
 	models.Connection() // conexão com o banco
-
 	server.GET("/books", handlers.FindBooks)
 	server.POST("/books", handlers.CreateBook)
 	server.GET("/books/:id", handlers.FindBook)
